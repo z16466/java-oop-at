@@ -1,6 +1,7 @@
 package ru.geekbrains.java.oop.at;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -9,6 +10,10 @@ import ru.geekbrains.java.oop.at.base.BaseTest;
 
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+
+@DisplayName("Проверка поиска")
 public class SearchTest extends BaseTest {
 
 //    Перейти на сайт https://geekbrains.ru/events
@@ -24,6 +29,7 @@ public class SearchTest extends BaseTest {
 //    Тестов не 0
 //    В Проектах и компаниях отображается GeekBrains
 
+@DisplayName("Проверка поиска по блокам")
     @Test
     void search() {
         WebElement buttonSearch = chromeDriver.findElement(By.cssSelector("[class=\"gb-top-menu__item\"] [class=\"show-search-form\"] [class*=\"svg-icon\"]"));
@@ -33,7 +39,7 @@ public class SearchTest extends BaseTest {
 
         WebElement professions = chromeDriver.findElement(By.xpath(".//header/h2[text()='Профессии']"));
         WebElement courses = chromeDriver.findElement(By.xpath(".//header/h2[text()='Курсы']"));
-        WebElement events = chromeDriver.findElement(By.xpath(".//header/h2[text()='Вебинары']"));
+        WebElement webinars = chromeDriver.findElement(By.xpath(".//header/h2[text()='Вебинары']"));
         WebElement blogs = chromeDriver.findElement(By.xpath(".//header/h2[text()='Блоги']"));
         WebElement forum = chromeDriver.findElement(By.xpath(".//header/h2[text()='Форум']"));
         WebElement tests = chromeDriver.findElement(By.xpath(".//header/h2[text()='Тесты']"));
@@ -41,33 +47,31 @@ public class SearchTest extends BaseTest {
 
         WebElement professionsCount = chromeDriver.findElement(By.xpath("//a[@class='search-page-block__more' and @data-tab='professions']/span"));
         WebElement coursesCount = chromeDriver.findElement(By.xpath("//a[@class='search-page-block__more' and @data-tab='courses']/span"));
-        WebElement eventsCount = chromeDriver.findElement(By.xpath("//a[@class='search-page-block__more' and @data-tab='webinars']/span"));
+        WebElement webinarsCount = chromeDriver.findElement(By.xpath("//a[@class='search-page-block__more' and @data-tab='webinars']/span"));
         WebElement blogsCount = chromeDriver.findElement(By.xpath("//a[@class='search-page-block__more' and @data-tab='blogs']/span"));
         WebElement forumsCount = chromeDriver.findElement(By.xpath("//a[@class='search-page-block__more' and @data-tab='forums']/span"));
         WebElement testsCount = chromeDriver.findElement(By.xpath("//a[@class='search-page-block__more' and @data-tab='tests']/span"));
 
-        List<WebElement> eventsList = chromeDriver.findElements(By.xpath("//a[@class='event__title h3 search_text']"));
+        WebElement webinarsList = chromeDriver.findElement(By.xpath("//a[@class='event__title h3 search_text']"));
+
         WebElement gbCompany = chromeDriver.findElement(By.xpath("//div[@class='company-items']//h3/a[contains(text(),'GeekBrains')]"));
 
         wait15second.until(ExpectedConditions.textToBePresentInElement(professions, "Профессии"));
         wait15second.until(ExpectedConditions.textToBePresentInElement(courses, "Курсы"));
-        wait15second.until(ExpectedConditions.textToBePresentInElement(events, "Вебинары"));
+        wait15second.until(ExpectedConditions.textToBePresentInElement(webinars, "Вебинары"));
         wait15second.until(ExpectedConditions.textToBePresentInElement(blogs, "Блоги"));
         wait15second.until(ExpectedConditions.textToBePresentInElement(forum, "Форум"));
         wait15second.until(ExpectedConditions.textToBePresentInElement(tests, "Тесты"));
         wait15second.until(ExpectedConditions.textToBePresentInElement(projectAndCompany, "Проекты и компании"));
 
-        Assertions.assertTrue((Integer.parseInt(professionsCount.getText())) >= 2, "Количество найденных профессий менее 2!");
-        Assertions.assertTrue((Integer.parseInt(coursesCount.getText())) > 15, "Количество найденных курсов <= 15!");
-        Assertions.assertTrue((Integer.parseInt(eventsCount.getText()) > 180) & (Integer.parseInt(eventsCount.getText()) < 300),
-                "Количество найденных вебинаров не в диапазоне (180; 300)");
-        Assertions.assertTrue((Integer.parseInt(blogsCount.getText())) > 300, "Количество найденных блогов менее 300!");
-        Assertions.assertTrue((Integer.parseInt(forumsCount.getText())) != 350, "Количество найденных форумов равно 350!");
-        Assertions.assertTrue((Integer.parseInt(testsCount.getText())) != 0, "Количество найденных тестов равно 0!");
+        assertThat(Integer.parseInt(professionsCount.getText()), greaterThanOrEqualTo(2));
+        assertThat(Integer.parseInt(coursesCount.getText()), greaterThan(15));
+        assertThat(Integer.parseInt(webinarsCount.getText()), allOf(greaterThan(180), lessThan(300)));
+        assertThat(Integer.parseInt(blogsCount.getText()), greaterThan(300));
+        assertThat(Integer.parseInt(forumsCount.getText()), not(equalTo(350)));
+        assertThat(Integer.parseInt(testsCount.getText()), not(equalTo(0)));
+        assertThat(webinarsList.getText(), equalTo("Java Junior. Что нужно знать для успешного собеседования?"));
 
-        Assertions.assertEquals("Java Junior. Что нужно знать для успешного собеседования?", eventsList.get(0).getText());
-
-        Assertions.assertNotNull(gbCompany, "В Проектах и компаниях не отображается GeekBrains");
-
+        assertThat(gbCompany, notNullValue());
     }
 }
